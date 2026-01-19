@@ -152,10 +152,10 @@
             <h2>
                 配菜
             </h2>
-            生菜<input type="checkbox" id="lettuce"><br>
-            魚蛋<input type="checkbox" id="fishball"><br>
+            生菜（低碳）<input type="checkbox" id="lettuce"><br>
+            魚蛋（低碳）<input type="checkbox" id="fishball"><br>
             牛肉<input type="checkbox" id="beef"><br>
-            鮮菇<input type="checkbox" id="mushroom"><br>
+            鮮菇（低碳）<input type="checkbox" id="mushroom"><br>
             火腿<input type="checkbox" id="ham"><br>
             炸醬<input type="checkbox" id="mincedpork"><br>
             <h2>
