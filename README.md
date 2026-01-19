@@ -16,10 +16,6 @@
             div#login
             {
                 background-image:linear-gradient(45deg,#0ff,#afa);
-                width:100%;
-                height:100%;
-                border:hidden;
-                box-sizing:border-box;
             }
             #login h1
             {
@@ -36,10 +32,6 @@
             div#food_menu
             {
                 background-image:linear-gradient(180deg,#fd0,#ffc);
-                width:100%;
-                height:100%;
-                border:hidden;
-                box-sizing:border-box;
                 display:none;
             }
             #food_menu h1,h2
@@ -63,8 +55,9 @@
             #food_menu #suggestion
             {
                 width:100%;
+                height:100px !important;
                 background-image:linear-gradient(45deg,#9f9,#9ff,#f9f);
-                border-style:inset;
+                border-style:inset !important;
                 border-width:2px;
                 border-radius:10px;
                 box-sizing: border-box;
@@ -77,10 +70,6 @@
             div#otherbonus
             {
                 background-image:linear-gradient(180deg,#fd0,#ffc);
-                width:100%;
-                height:100%;
-                border:hidden;
-                box-sizing:border-box;
                 display:none;
             }
             #otherbonus button
@@ -96,13 +85,14 @@
                 border-radius:10px;
                 box-sizing:border-box;
             }
+            div#leftover
+            {
+                background-image: linear-gradient(45deg,#fd0,#ffc);
+                display: none;
+            }
             div#statspage
             {
                 background-image:linear-gradient(180deg,#afa,#bfb);
-                width:100%;
-                height:100%;
-                border:hidden;
-                box-sizing:border-box;
                 display:none;
             }
             #statspage #graph
@@ -125,6 +115,13 @@
                 border-style:groove;
                 border-width:2px;
                 border-radius:10px;
+                box-sizing:border-box;
+            }
+            div
+            {
+                width:100%;
+                height:800px;
+                border:hidden;
                 box-sizing:border-box;
             }
         </style>
@@ -184,6 +181,13 @@
                 提交
             </button>
         </div>
+        <div id="leftover">
+            <p class="c1">請輸入廚餘的質量（g）。</p>
+            <input id=leftovermass value="">
+            <button type="button" onclick="bonus2()">
+                提交
+            </button>
+        </div>
         <div id="statspage">
             <p class="c1">
                 用戶積分
@@ -238,7 +242,16 @@
             {
                  deltabonus(50);
             }
-            redirect("otherbonus","statspage");
+            redirect("otherbonus","leftover");
+        }
+        function bonus2()
+        {
+            let leftover_mass=document.getElementById("leftovermass").value;
+            if(leftover_mass<=100)
+            {
+                 deltabonus(50);
+            }
+            redirect("leftover","statspage");
         }
         function displaygoal(target,rewards)
         {
