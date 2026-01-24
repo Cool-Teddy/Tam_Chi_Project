@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>譚仔｜低碳 AI 建議 Demo（友善介面）</title>
+  <style>
+    :root{
+      --bg: #fffefb;
+      --card: #ffffff;
+      --text: #222;
+      --muted: #6b7280;
+      --brand: #2563eb;
+      --brand-weak: #dbeafe;
+      --good: #10b981;
+      --warn: #f59e0b;
+      --bad: #ef4444;
+      --radius: 14px;
+      --shadow: 0 8px 24px rgba(0,0,0,.08);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans CJK TC",sans-serif;}
+    h1,h2,h3{margin:0 0 .5rem 0}
+    p{margin:.25rem 0}
+    a{color:var(--brand)}
+
+    /* App shell */
+    .app{
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+    header.appbar{
+      position: sticky; top: 0; z-index: 10;
+      background: linear-gradient(180deg,#fff,rgba(255,255,255,.7));
+      backdrop-filter: saturate(1.2) blur(10px);
+      border-bottom: 1px solid #eee;
+    }
+    .appbar-inner{
+      display:flex;align-items:center;gap:12px; padding: 12px 8px;
+    }
+    .brand{display:flex;align-items:center;gap:8px;font-weight:700}
+    .brand-badge{display:inline-grid;place-items:center;width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,#34d399,#60a5fa);color:#fff;font-weight:800}
+    .spacer{flex:1}
+    .navbtn{appearance:none;border:1px solid #e5e7eb;background:#fff;padding:8px 12px;border-radius:10px;cursor:pointer;font-size:14px}
+    .navbtn:focus{outline:3px solid var(--brand-weak)}
+
+    /* Cards & layout */
+    .grid{display:grid;gap:16px}
+    @media(min-width: 760px){ .grid-2{grid-template-columns: 1.2fr .8fr} }
+    .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
+    .section-title{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+    .hint{color:var(--muted);font-size:14px}
+
+    /* Inputs */
+    .option{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #eee;border-radius:10px;cursor:pointer}
+    .option:hover{background:#fafafa}
+    .group{display:grid;gap:10px}
+    .chips{display:flex;flex-wrap:wrap;gap:8px}
+    .chip{padding:6px 10px;border-radius:999px;border:1px dashed #ddd;font-size:12px;color:var(--muted)}
+
+    /* Buttons */
+    .btn{appearance:none;border:none;background:var(--brand);color:#fff;padding:12px 16px;border-radius:12px;cursor:pointer;font-weight:600;box-shadow:var(--shadow)}
+    .btn.secondary{background:#fff;color:var(--brand);border:1px solid var(--brand)}
+    .btn:active{transform:translateY(1px)}
+
+    /* Suggestion panel */
+    #suggestion{background: linear-gradient(135deg,#ecfeff,#f0fdf4);border:1px solid #dcfce7;border-radius:12px;padding:12px}
+    #suggestion .title{font-weight:700;display:flex;align-items:center;gap:8px}
+    #suggestion .title .badge{background:#111;color:#fff;border-radius:8px;padding:2px 8px;font-size:12px}
+    #suggestion ul{margin:.25rem 0 .5rem 1.25rem}
+    #suggestion .tipline{font-size:14px;color:#065f46}
+
+    /* Score page */
+    .score-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+    #graph{width:220px;height:220px;border-radius:50%;background-image:conic-gradient(#3b82f6,#3b82f6 90deg,#fde047 90deg);box-shadow:var(--shadow)}
+    .score-info{flex:1}
+    table{width:100%;border-collapse:collapse}
+    th,td{border-bottom:1px solid #eee;padding:10px;text-align:left}
+    th{background:#fafafa}
+
+    /* Pages */
+    .page{display:none}
+    .page.active{display:block}
+
+    /* Accessibility focus */
+    input:focus-visible{outline:2px solid var(--brand)}
+  </style>
+</head>
+<body>
+  <header class="appbar" role="banner">
+    <div class="appbar-inner app">
+      <div class="brand" aria-label="譚仔 低碳 AI 建議">
+        <div class="brand-badge" aria-hidden="true">譚</div>
+        譚仔 · 低碳 AI 建議
+      </div>
+      <div class="spacer"></div>
+      <button class="navbtn" onclick="showPage('food_menu')">菜單</button>
+      <button class="navbtn" onclick="showPage('statspage')">積分</button>
+      <button class="navbtn" onclick="showPage('login')">登出</button>
+    </div>
+  </header>
+
+  <main class="app">
+    <!-- Login Page -->
+    <section id="login" class="page active" aria-labelledby="login-title">
+      <div class="card" style="text-align:center">
+        <h1 id="login-title">歡迎回來 👋</h1>
+        <p class="hint">用手機號碼快速登入</p>
+        <div style="display:flex;gap:8px;justify-content:center;margin:16px 0">
+          <input id="pn" value="XXXX_XXXX" aria-label="電話號碼" style="padding:12px 14px;border:1px solid #e5e7eb;border-radius:12px;min-width:260px"/>
+          <button class="btn" onclick="redirect('login','food_menu')">登入</button>
+        </div>
+        <div class="chips">
+          <span class="chip">🎯 低碳選擇賺積分</span>
+          <span class="chip">🌿 即時 AI 建議</span>
+          <span class="chip">🍜 個人化配搭</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Menu Page -->
+    <section id="food_menu" class="page" aria-labelledby="menu-title">
+      <div class="grid grid-2">
+        <div class="card">
+          <div class="section-title"><h2 id="menu-title">菜單</h2><span class="hint">勾選配菜即可獲得 AI 建議</span></div>
+
+          <h3>① 面底</h3>
+          <div class="group" role="radiogroup" aria-label="面底">
+            <label class="option"><input type="radio" id="rice-n" name="noodle"> 米線</label>
+            <label class="option"><input type="radio" id="potato-n" name="noodle"> 紅薯粉</label>
+          </div>
+
+          <h3 style="margin-top:14px">② 配菜</h3>
+          <div class="group" aria-label="配菜">
+            <label class="option"><input type="checkbox" id="lettuce"> 🥬 生菜（低碳）</label>
+            <label class="option"><input type="checkbox" id="fishball"> 🐟 魚蛋（低碳）</label>
+            <label class="option"><input type="checkbox" id="beef"> 🥩 牛肉</label>
+            <label class="option"><input type="checkbox" id="mushroom"> 🍄 鮮菇（低碳）</label>
+            <label class="option"><input type="checkbox" id="ham"> 🥓 火腿</label>
+            <label class="option"><input type="checkbox" id="mincedpork"> 🫘 炸醬</label>
+          </div>
+
+          <h3 style="margin-top:14px">③ 湯底</h3>
+          <div class="group" role="radiogroup" aria-label="湯底">
+            <label class="option"><input type="radio" id="clear_s" name="soup"> 清湯</label>
+            <label class="option"><input type="radio" id="tomato_s" name="soup"> 番茄濃湯</label>
+            <label class="option"><input type="radio" id="spicy_s" name="soup"> 麻辣</label>
+            <label class="option"><input type="radio" id="sousp_s" name="soup"> 酸辣湯</label>
+          </div>
+
+          <div style="display:flex;gap:8px;margin-top:18px">
+            <button class="btn" onclick="nextp_and_bonus(['beef','ham','mincedpork'])">點餐</button>
+            <button class="btn secondary" onclick="resetMenu()">重設</button>
+          </div>
+        </div>
+
+        <!-- Live AI Suggestion -->
+        <aside class="card" aria-live="polite" aria-atomic="true">
+          <div id="suggestion">
+            <div class="title"><span class="badge">AI</span> 推薦</div>
+            <p class="tipline">勾選配菜後，這裡會即時提供更低碳的替代配搭。</p>
+            <ul id="suggestionList" class="c3"></ul>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- Other Bonus Page -->
+    <section id="otherbonus" class="page" aria-labelledby="ob-title">
+      <div class="card">
+        <h2 id="ob-title">你們有自備餐具嗎？</h2>
+        <div class="group" style="margin:10px 0 16px">
+          <label class="option"><input type="radio" id="yes" name="ownc"> 有</label>
+          <label class="option"><input type="radio" id="no"  name="ownc"> 沒有</label>
+        </div>
+        <button class="btn" onclick="addbonus()">提交</button>
+      </div>
+    </section>
+
+    <!-- Leftover Page -->
+    <section id="leftover" class="page" aria-labelledby="leftover-title">
+      <div class="card">
+        <h2 id="leftover-title">請輸入廚餘的質量（g）</h2>
+        <div style="display:flex;gap:10px;align-items:center;margin:10px 0 16px">
+          <input id="leftovermass" inputmode="numeric" pattern="[0-9]*" placeholder="例如：50" style="padding:12px 14px;border:1px solid #e5e7eb;border-radius:12px;min-width:160px" />
+          <button class="btn" onclick="bonus2()">提交</button>
+        </div>
+        <p class="hint">≤ 100g 可再獲得 50 分</p>
+      </div>
+    </section>
+
+    <!-- Stats Page -->
+    <section id="statspage" class="page" aria-labelledby="stats-title">
+      <div class="card">
+        <h2 id="stats-title">用戶積分</h2>
+        <div class="score-row" style="margin-top:10px">
+          <div id="graph" role="img" aria-label="目前進度圓形圖"></div>
+          <div class="score-info">
+            <p id="goalmessage" style="font-size:18px;font-weight:700">距離下一個目標：—</p>
+            <div id="goalsheet" style="margin-top:10px"></div>
+            <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn" onclick="showPage('food_menu')">回去點餐</button>
+              <button class="btn secondary" onclick="showPage('login')">登出</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    let bonus=0;
+    const targetlist=[500,1000,2500,5000];
+    const rewardslist=["二十元折扣","五折優惠","贈送一個碗","免費麵一碗"];
+
+    // ---------- Navigation ----------
+    function showPage(id){
+      document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      if(id==='food_menu') updateAISuggestion();
+    }
+    function redirect(hide,show){ showPage(show); }
+
+    // ---------- Score & Graph ----------
+    function deltabonus(delta){
+      bonus+=delta;
+      let k=0; while(k < targetlist.length-1 && targetlist[k] <= bonus) k++;
+      const targetpoint = targetlist[k] || targetlist[targetlist.length-1];
+      const graph_deg = Math.max(0, Math.min(360, (bonus/targetpoint)*360));
+      document.getElementById('goalmessage').innerText = `距離下一個目標：${Math.max(0,targetpoint-bonus)}/${targetpoint}`;
+      document.getElementById('graph').style.backgroundImage = `conic-gradient(#3b82f6,#3b82f6 ${graph_deg}deg,#fde047 ${graph_deg}deg)`;
+    }
+
+    function displaygoal(target,rewards){
+      let goaltext = '<table><tr><th>目標分數</th><th>獎勵</th></tr>';
+      for(let i=0;i<target.length;i++){
+        goaltext += `<tr><td>${target[i]}</td><td>${rewards[i]}</td></tr>`;
+      }
+      goaltext += '</table>';
+      document.getElementById('goalsheet').innerHTML = goaltext;
+    }
+
+    // ---------- Live AI Suggestion ----------
+    function updateAISuggestion(){
+      const sList = document.getElementById('suggestionList');
+      const picked = {
+        lettuce: document.getElementById('lettuce')?.checked,
+        fishball: document.getElementById('fishball')?.checked,
+        beef: document.getElementById('beef')?.checked,
+        mushroom: document.getElementById('mushroom')?.checked,
+        ham: document.getElementById('ham')?.checked,
+        mincedpork: document.getElementById('mincedpork')?.checked
+      };
+      const tips=[];
+      if(picked.beef){ tips.push('你可以改用雞肉，相比牛肉可減少約 60% 碳排，味道相似喔！或改選魚蛋／鮮菇也更低碳。'); }
+      if(picked.ham){ tips.push('火腿屬於加工肉類，建議改選鮮菇或生菜更環保！'); }
+      if(picked.mincedpork){ tips.push('炸醬屬於較高碳排豬肉類，可以改選魚蛋，或加多一份蔬菜降低影響。'); }
+      const low = (picked.lettuce||picked.fishball||picked.mushroom);
+      if(!picked.beef && !picked.ham && !picked.mincedpork && low){ tips.push('很棒！你已選了低碳配菜（如生菜／魚蛋／鮮菇）。'); }
+      sList.innerHTML = tips.length ? tips.map(t=>`<li>${t}</li>`).join('') : '<li class="c3">勾選配菜後，AI 會在這裡提供更低碳替代建議。</li>';
+    }
+
+    // Bind change events once DOM is ready
+    window.addEventListener('DOMContentLoaded', () => {
+      ['lettuce','fishball','beef','mushroom','ham','mincedpork'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.addEventListener('change', updateAISuggestion);
+      });
+      displaygoal(targetlist,rewardslist);
+      updateAISuggestion();
+    });
+
+    // ---------- Flow actions ----------
+    function nextp_and_bonus(badfood){
+      updateAISuggestion();
+      let foodcheck=true; for(const id of badfood){ if(document.getElementById(id).checked) foodcheck=false; }
+      if(foodcheck) deltabonus(100);
+      showPage('otherbonus');
+    }
+    function addbonus(){ if(document.getElementById('yes').checked){ deltabonus(50); } showPage('leftover'); }
+    function bonus2(){
+      const mass = parseFloat(document.getElementById('leftovermass').value||'0');
+      if(mass<=100){ deltabonus(50); }
+      showPage('statspage');
+    }
+
+    function resetMenu(){
+      ['lettuce','fishball','beef','mushroom','ham','mincedpork','rice-n','potato-n','clear_s','tomato_s','spicy_s','sousp_s'].forEach(id=>{
+        const el=document.getElementById(id); if(el) el.checked=false;
+      });
+      updateAISuggestion();
+    }
+  </script>
+</body>
+</html>
